@@ -8,10 +8,14 @@ package com.roma.simplebjclient;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.util.JSONTokener;
 
@@ -80,7 +84,7 @@ public class ClientController {
     }
 
     private void performRoundStart(JSONObject data) {
-        listener.roundStart();
+        listener.roundStart(data.getLong("timer"));
     }
 
     private void performBetsConfirm(JSONObject data) {
@@ -92,21 +96,39 @@ public class ClientController {
     }
 
     private void performRoundFinish(JSONObject data) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        listener.roundFinish(data.getInt("winAmount"));
     }
 
     private void performActions(JSONObject data) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        JSONArray acts = data.getJSONArray("actions");
+        Set<BjAction> actions = new HashSet<BjAction>();
+        for (int i = 0; i < acts.size(); i++)
+            actions.add(BjAction.valueOf(acts.getString(i)));
+        listener.actions(data.getLong("timer"), actions);
+    }
+
+    void makeBet(int bet) {
+        JSONObject o = new JSONObject();
+        o.put("action", "bet");
+        o.put("amount", bet);
+        send(o.toString());
+    }
+    
+    void makeAction(BjAction act) {
+        JSONObject o = new JSONObject();
+        o.put("action", "action");
+        o.put("value", act);
+        send(o.toString());
     }
     
     static interface OnReceiveListener {
         public void onReceive(String s);
         public void connect(int position);
-        public void roundStart();
+        public void roundStart(long timer);
         public void betsConfirm();
         public void roundFinish(int winAmount);
         public void dealCards(Card card, int position, int points);
-        public void actions(long time, Set<BjAction> action);
+        public void actions(long timer, Set<BjAction> action);
     }
     
 }

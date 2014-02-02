@@ -5,6 +5,13 @@
  */
 package com.roma.simplebjclient;
 
+import java.awt.Component;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+
 /**
  *
  * @author ko3a4ok
@@ -19,6 +26,8 @@ public class Client extends javax.swing.JFrame implements ClientController.OnRec
         initComponents();
         controller = new ClientController();
         controller.setOnReceiveListener(this);
+        setEnabled(betPanel, false);
+        setEnabled(actionPanel, false);
     }
 
     /**
@@ -31,10 +40,16 @@ public class Client extends javax.swing.JFrame implements ClientController.OnRec
     private void initComponents() {
 
         jButton1 = new javax.swing.JButton();
-        sendText = new javax.swing.JTextField();
-        send = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         receivedText = new javax.swing.JTextArea();
+        actionPanel = new javax.swing.JPanel();
+        hit = new javax.swing.JButton();
+        stand = new javax.swing.JButton();
+        btnDouble = new javax.swing.JButton();
+        betPanel = new javax.swing.JPanel();
+        send = new javax.swing.JButton();
+        betAmount = new javax.swing.JTextField();
+        timerLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -45,18 +60,88 @@ public class Client extends javax.swing.JFrame implements ClientController.OnRec
             }
         });
 
-        sendText.setText("jTextField1");
+        receivedText.setColumns(20);
+        receivedText.setRows(5);
+        jScrollPane1.setViewportView(receivedText);
 
-        send.setText("Send");
+        actionPanel.setEnabled(false);
+
+        hit.setText("Hit");
+        hit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                hitActionPerformed(evt);
+            }
+        });
+
+        stand.setText("Stand");
+        stand.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                standActionPerformed(evt);
+            }
+        });
+
+        btnDouble.setText("Double");
+        btnDouble.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDoubleActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout actionPanelLayout = new javax.swing.GroupLayout(actionPanel);
+        actionPanel.setLayout(actionPanelLayout);
+        actionPanelLayout.setHorizontalGroup(
+            actionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(actionPanelLayout.createSequentialGroup()
+                .addComponent(hit)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(stand)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnDouble)
+                .addContainerGap(71, Short.MAX_VALUE))
+        );
+        actionPanelLayout.setVerticalGroup(
+            actionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, actionPanelLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(actionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(hit)
+                    .addComponent(stand)
+                    .addComponent(btnDouble))
+                .addGap(20, 20, 20))
+        );
+
+        betPanel.setEnabled(false);
+
+        send.setText("Make bet");
         send.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 sendActionPerformed(evt);
             }
         });
 
-        receivedText.setColumns(20);
-        receivedText.setRows(5);
-        jScrollPane1.setViewportView(receivedText);
+        betAmount.setText("20");
+
+        javax.swing.GroupLayout betPanelLayout = new javax.swing.GroupLayout(betPanel);
+        betPanel.setLayout(betPanelLayout);
+        betPanelLayout.setHorizontalGroup(
+            betPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, betPanelLayout.createSequentialGroup()
+                .addGap(29, 29, 29)
+                .addComponent(betAmount, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(send)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        betPanelLayout.setVerticalGroup(
+            betPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(betPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addComponent(send)
+                .addComponent(betAmount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+
+        timerLabel.setFont(new java.awt.Font("Lucida Grande", 1, 24)); // NOI18N
+        timerLabel.setForeground(new java.awt.Color(0, 0, 255));
+        timerLabel.setText("0");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -67,26 +152,30 @@ public class Client extends javax.swing.JFrame implements ClientController.OnRec
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(sendText, javax.swing.GroupLayout.PREFERRED_SIZE, 297, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(send))
-                    .addGroup(layout.createSequentialGroup()
                         .addComponent(jButton1)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(timerLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(actionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(betPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jButton1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButton1)
+                    .addComponent(timerLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 208, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(sendText)
-                    .addComponent(send, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 237, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(actionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(betPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -97,11 +186,33 @@ public class Client extends javax.swing.JFrame implements ClientController.OnRec
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void sendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendActionPerformed
-        String s = sendText.getText();
-        sendText.setText("");
-        controller.send(s);
+        int bet = Integer.valueOf(betAmount.getText());
+        controller.makeBet(bet);
+        timer.cancel();
+        timerLabel.setText("");
+        setEnabled(betPanel, false);
     }//GEN-LAST:event_sendActionPerformed
 
+    private void hitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hitActionPerformed
+        makeAction(BjAction.Hit);
+    }//GEN-LAST:event_hitActionPerformed
+
+    private void standActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_standActionPerformed
+        makeAction(BjAction.Stand);
+    }//GEN-LAST:event_standActionPerformed
+
+    private void btnDoubleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDoubleActionPerformed
+        makeAction(BjAction.Double);
+    }//GEN-LAST:event_btnDoubleActionPerformed
+
+    
+    private void makeAction(BjAction action) {
+        controller.makeAction(action);
+        timer.cancel();
+        setEnabled(actionPanel, false);
+    }
+    
+    
     /**
      * @param args the command line arguments
      */
@@ -138,15 +249,85 @@ public class Client extends javax.swing.JFrame implements ClientController.OnRec
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel actionPanel;
+    private javax.swing.JTextField betAmount;
+    private javax.swing.JPanel betPanel;
+    private javax.swing.JButton btnDouble;
+    private javax.swing.JButton hit;
     private javax.swing.JButton jButton1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextArea receivedText;
     private javax.swing.JButton send;
-    private javax.swing.JTextField sendText;
+    private javax.swing.JButton stand;
+    private javax.swing.JLabel timerLabel;
     // End of variables declaration//GEN-END:variables
 
     public void onReceive(String s) {
         System.err.println("received: " + s);
         receivedText.append(s+"\n");
+    }
+
+    @Override
+    public void connect(int position) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    private void setEnabled(JPanel p, boolean enabled) {
+        for (Component c : p.getComponents())
+            c.setEnabled(enabled);
+    }
+    @Override
+    public void roundStart(final long timer) {
+        this.timer = new Timer();
+        this.timer.schedule(new TimerTask() {
+            private long countSec = 0;    
+            @Override
+            public void run() {
+                long left = timer-countSec;
+                timerLabel.setText("" + left/1000);
+                countSec += 1000;
+                if (countSec > timer) { 
+                    setEnabled(betPanel, false);
+                    cancel();
+                }
+            }
+        }, 0, 1000);
+        setEnabled(betPanel, true);
+    }
+    
+    private Timer timer;
+
+    @Override
+    public void betsConfirm() {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void roundFinish(int winAmount) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void dealCards(Card card, int position, int points) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void actions(final long timer, Set<BjAction> action) {
+        this.timer = new Timer();
+        this.timer.schedule(new TimerTask() {
+            private long countSec = 0;    
+            @Override
+            public void run() {
+                long left = timer-countSec;
+                timerLabel.setText("" + left/1000);
+                countSec += 1000;
+                if (countSec > timer) { 
+                    setEnabled(actionPanel, false);
+                    cancel();
+                }
+            }
+        }, 0, 1000);
+        setEnabled(actionPanel, true);
     }
 }
